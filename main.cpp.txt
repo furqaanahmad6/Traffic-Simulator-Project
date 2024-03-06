@@ -1,0 +1,291 @@
+#include <iostream>
+#include<time.h>
+#include "mygraphics.h"
+
+using namespace std;
+
+
+
+class Intersection
+{
+protected:
+	int x1, y1, x2, y2;
+	
+
+public:
+
+	Intersection(int x1, int y1, int x2, int y2)
+	{
+		this->x1 = x1;
+		this->y1 = y1;
+		this->x2 = x2;
+		this->y2 = y2;
+	}
+
+	 void draw()
+	{
+		drawRectangle(x1,y1,x2,y2,0,0,0,0,255,127);//background
+		drawRectangle((x2/2)-70, y1, (x2/2)+70, y2, 128, 128, 128, 128, 128, 128);//vertical
+		drawRectangle(x1,(y2 / 2) - 70, x2, (y2 / 2) + 70, 128, 128, 128, 128, 128, 128);//horizontal
+		drawLine(x2/2, 0, x2/2, (y2/2)-71, 255, 255, 0);//top vertical
+		drawLine(x2/2, (y2/2)+71, x2/2, y2, 255, 255, 0);//bottom vertical
+		drawLine(0, y2 / 2, (x2/2)-71, y2/2, 255, 255, 0);//left horizontal
+		drawLine((x2/2)+71, y2/2, x2-1, y2/2, 255, 255, 0);//right horizontal
+	}
+	 
+};
+
+
+
+class Car {
+private:
+
+	void updateY(int Y, bool color)
+	{
+		y = Y;
+		drawCar(x, Y, 30, 30, color);
+	}
+	void updateX(int X,bool color)
+	{
+		 x = X;
+		 drawCar(X, y, 30, 30, !color);
+	}
+public:
+	int x, y,i=0,h,w;
+	bool isy, dir,col;
+	Car() {}
+	Car(int x,int y,bool moveY, bool iy, bool d, int hi, int wi)
+	{
+		srand(time(0));
+		col = rand() % 2;
+		this->isy = iy;
+		this->dir = d;
+
+		this->x = x;
+		this->y = y;
+		this->h = hi;
+		this->w = wi;
+	}
+
+	void itrate(int speed)
+	{
+
+		i=i + speed;
+
+		if(isy)
+		{
+			if (i > h)
+			{
+				i = 0;
+				srand(time(0));
+				col = rand() % 2;
+			}
+			if(dir)
+				updateY(i,col);
+			else
+				updateY(h-i,col);
+		}
+		else if( !isy)
+		{
+
+			if (i > w) {
+				i = 0;
+				srand(time(0));
+				col = rand() % 2;
+			}
+
+			if(dir)
+				updateX(i,col);
+			else
+				updateX(w-i,col);
+		}
+
+	}
+};
+
+class TrafficLight
+{
+public:
+	int x, y;
+	bool triger = false;
+	int size = 10;
+	TrafficLight(){}
+	TrafficLight(int x, int y, bool triger, bool isHor)
+	{
+		this->x = x;
+		this->y = y;
+		this->triger = triger;
+		if(isHor)
+			drawLightHori(triger);
+		else
+			drawLightVar(triger);
+
+	}
+	void drawLightHori(bool isRed)
+	{
+		if (isRed) {
+			drawRectangle(x, y, x + 42, y + 12, 192, 192, 192, 192, 192, 192);
+			drawCircle(x, (y + 1), size, 'g');
+			drawCircle(x + 15, y + 1, size, 'g');
+			drawCircle(x + 30, y + 1, size, 'r');
+		}
+		else
+		{
+			drawRectangle(x, y, x + 42, y + 12, 192, 192, 192, 192, 192, 192);
+			drawCircle(x, y + 1, size, 'n');
+			drawCircle(x + 15, y + 1, size, 'g');
+			drawCircle(x + 30, y + 1, size, 'g');
+
+		}
+	}
+	void drawLightVar(bool isRed)
+	{
+		if (isRed)
+		{
+			drawRectangle(x, y, x + 12, y + 42, 192, 192, 192, 192, 192, 192);
+			drawCircle(x+1, y + 1, size, 'n');
+			drawCircle(x+1 , y +15, size, 'g');
+			drawCircle(x+1, y + 30, size, 'g');
+		}
+		else
+		{
+			drawRectangle(x, y, x + 12, y + 42, 192, 192, 192, 192, 192, 192);
+			drawCircle(x + 1, y + 1, size, 'g');
+			drawCircle(x + 1, y + 15, size, 'g');
+			drawCircle(x + 1, y + 30, size, 'r');
+
+		}
+	}
+};
+
+class CarController : public Car
+{
+public:
+	//       x,y
+	int h, w,itr;
+	Car c0;
+	Car c1;
+	Car c2;
+	Car c3;
+	CarController(int x,int y)
+	{
+		w = x;
+		h = y;
+		intState();
+	}
+	void intState()
+	{
+		c0 = Car((w / 2) - 52, 0, 1,true, true, h, w);
+		
+		c1 = Car((w / 2) + 22, h, 1, true, false, h, w);
+	
+		c2 = Car(0, (h / 2) - 50, 1, false, false, h, w);
+			
+		c3 = Car(0, (h / 2) + 20, 1, false, true, h, w);
+
+	}
+	void itrator(bool stop)
+	{
+		if(stop && c0.isy && c0.i > (h/2)-120 && c0.i < (h / 2) - 90)
+			c0.itrate(0);
+		else
+			c0.itrate(15);
+		if (stop && c1.isy && c1.i > (h / 2) - 90 && c1.i < (h / 2) - 70)
+			c1.itrate(0);
+		else
+			c1.itrate(17);
+		if (!stop && !c2.isy && c2.i > (w / 2)-90 && c2.i < (w / 2) -70)
+			c2.itrate(0);
+		else
+			c2.itrate(9);
+		if (!stop && !c3.isy && c3.i > (w / 2) - 120 && c3.i < (w / 2) - 90)
+			c3.itrate(0);
+		else
+			c3.itrate(10);
+	}
+
+};
+
+class LightUpdator : public TrafficLight
+
+{
+public:
+	TrafficLight t1;
+	TrafficLight t3;
+	TrafficLight t4;
+	TrafficLight t2;
+	bool trigger = false;
+	int w, h;
+	LightUpdator(int x, int y, bool t) {
+		trigger = t;
+		w = x;
+		h = y;
+		t1 = TrafficLight((w / 2) - 120, (h / 2) - 90, trigger, true);
+		t3 = TrafficLight((w / 2) + 80, (h / 2) + 80, trigger, true);
+		t4 = TrafficLight((w / 2) + 80, (h / 2) - 120, !trigger, true);
+		t2= TrafficLight((w / 2) - 90, (h / 2) + 80, !trigger, true);
+	}
+	bool update()
+	{
+		trigger = !trigger;
+		t1.drawLightHori(trigger);
+		t2.drawLightVar(!trigger);
+		t3.drawLightHori(trigger);
+		t4.drawLightVar(!trigger);
+		return trigger;
+	}
+	void renderLight() {
+		t1.drawLightHori(trigger);
+		t2.drawLightVar(trigger);
+		t3.drawLightHori(trigger);
+		t4.drawLightVar(trigger);
+	}
+
+};
+
+void render ()
+{
+
+	showConsoleCursor(false);
+
+	// Initializing
+	int w = 0, h = 0;
+	getWindowDimensions(w, h);
+	w = h;
+
+	cls();
+	showConsoleCursor(false);
+
+	Intersection obj(0, 0, w, h);
+	LightUpdator t(w, h, true);
+	CarController c(w, h);
+	int itr = 0;
+	while (true)
+	{
+		obj.Intersection::draw();
+		c.itrator(t.trigger);
+		if(itr == 40)
+		{
+			t.update();
+		}
+		
+		t.renderLight();
+		delay(100);
+		itr++;
+		itr = itr%50;
+		cls();
+	}
+
+}
+int main()
+{
+	render();
+	
+	cls();
+	showConsoleCursor(true);
+
+	gotoxy(0,0);
+
+	return 0;
+}
+
